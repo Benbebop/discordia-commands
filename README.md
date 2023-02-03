@@ -7,8 +7,9 @@ A library for [Discordia 2](https://github.com/SinisterRectus/Discordia) that pr
 I won't be putting this on Lit, so you will have to clone it.
 
 1. Follow the instructions for installing [Discordia](https://github.com/SinisterRectus/Discordia).
-2. `cd` into your bot directory.
-3. Then run `git clone https://github.com/Benbebop/discordia-commands ./deps/discordia-commands`
+2. Also install [Discordia Interactions](https://github.com/Bilal2453/discordia-interactions).
+3. `cd` into your bot directory.
+4. Then run `git clone https://github.com/Benbebop/discordia-commands ./deps/discordia-commands`
 
 You should then have a folder named `discordia-commands` in your deps folder.
 
@@ -34,18 +35,18 @@ require("discordia-commands")
 
 local client = discordia.Client()
 
-local command = client:newSlashCommand( "say" )
-command:setDescription( "make the bot say something cool" )
+local command = client:newSlashCommand( "Say" )
+command:setDescription( "Make the bot say something cool" )
 
-client:on("slashCommand", function()
-	
+client:on("slashCommand", function(interaction, arguments)
+	interaction:reply(arguments[1])
 end)
 
-command = client:newUserCommand( "hello" )
-command:setDescription( "make the bot say hello" )
+command = client:newUserCommand( "Hello" )
+command:setDescription( "Make the bot say hello" )
 
 client:on("userCommand", function()
-	
+	interaction:reply("Hello")
 end)
 
 client:run("Bot " .. TOKEN)
