@@ -1,4 +1,6 @@
-local API = {}
+local discordia = require("discordia")
+local API = rawget(discordia.class.classes.Client, "_api")
+
 local f = string.format
 
 local endpoints = require("endpoints")

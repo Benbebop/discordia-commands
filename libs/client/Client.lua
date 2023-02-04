@@ -3,7 +3,11 @@
 @d Some new functions added onto Discordia's Client.
 ]=]
 
-local Client = {}
+local discordia = require("discordia")
+
+local Command = require("containers/Command")
+
+local Client = discordia.class.classes.Client
 
 --[=[
 @m newSlashCommand
