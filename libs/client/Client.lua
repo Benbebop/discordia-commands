@@ -1,6 +1,6 @@
 --[=[
 @c Client
-@d Some new functions added onto Discordia's Client.
+@d All additions made to the Client class.
 ]=]
 
 local discordia = require("discordia")
@@ -69,6 +69,34 @@ end
 ]=]
 function Client:cacheCommands()
 	
+end
+
+--[=[ 
+@p applicationCommands TableIterable All global commands currently cached to the client. Note: This is not updated by gateway events, you can request an update by using `Client:cacheCommands()`.
+]=]
+function Client.__getters:applicationCommands()
+	return self._appCommands
+end
+
+--[=[ 
+@p slashCommands FilteredIterable All global slash commands currently cached to the client.
+]=]
+function Client.__getters:slashCommands()
+	return self._appCommands
+end
+
+--[=[ 
+@p userCommands FilteredIterable All global slash commands currently cached to the client.
+]=]
+function Client.__getters:userCommands()
+	return self._appCommands
+end
+
+--[=[ 
+@p messageCommands FilteredIterable All global slash commands currently cached to the client.
+]=]
+function Client.__getters:messageCommands()
+	return self._appCommands
 end
 
 return Client
