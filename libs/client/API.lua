@@ -1,5 +1,5 @@
 local discordia = require("discordia")
-local API = rawget(discordia.class.classes.Client, "_api")
+local API = discordia.class.classes.API
 
 local f = string.format
 
