@@ -1,6 +1,6 @@
 --[=[
 @c Command x Snowflake
-@d Represents an application command of any type. This object has no way to update automatically, so changes will not register until manually requested, this usually isnt an issue unless you control the bot through multiple different instances.
+@d Represents an application command of any type. This object has no way to update automatically, so changes will not register until manually requested, this usually isnt an issue unless you control the bot through multiple different instances. No check are made for whether an operation is valid for the type of command you are making, so be weary what you are inputting.
 ]=]
 
 local discordia = require("discordia")
