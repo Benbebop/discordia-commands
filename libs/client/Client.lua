@@ -76,6 +76,16 @@ function Client:__init( ... )
 	self._commandCache = Cache( self._commandInit )
 	
 	self:on("ready", function()
+		self._commandTable = self._commandInit self._commandInit = nil
+		local toRemove = {}
+		for i,v in ipairs(self._commandTable) do
+			if v._guild then
+				table.insert( self:getGuild(v._guild)._commandTable, v )
+				table.insert( toRemove, i )
+			end
+		end
+		for _,v in ipairs(toRemove) table.remove(self._commandTable, v) end
+		
 		self:cacheCommands()
 	end)
 	
