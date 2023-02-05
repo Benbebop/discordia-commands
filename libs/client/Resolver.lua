@@ -1,10 +1,12 @@
 -- discordia doesnt expose Resolver, so i gotta do this ¯\_(ツ)_/¯
 
+local discordia = require("discordia")
+
 local fs = require('fs')
 local ffi = require('ffi')
 local ssl = require('openssl')
-local class = require('class')
-local enums = require('enums')
+local class = discordia.class
+local enums = discordia.enums
 
 local permission = assert(enums.permission)
 local gatewayIntent = assert(enums.gatewayIntent)
