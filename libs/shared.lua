@@ -15,7 +15,7 @@ function shared.newCommand( self, client, commandType, name, overwriteGuild )
 			exists = true
 		end
 	end
-	if not exists then table.insert(self[tblIndex]), c) end
+	if not exists then table.insert(self[tblIndex], c) end
 	return c
 end
 

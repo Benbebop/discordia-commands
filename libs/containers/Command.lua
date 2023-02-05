@@ -35,7 +35,7 @@ function Command:_execute()
 		end
 	else
 		if self._guild then
-			data = self._client._api:createGuildApplicationCommand(self._guild, payload))
+			data = self._client._api:createGuildApplicationCommand(self._guild, payload)
 		else
 			data = self._client._api:createGlobalApplicationCommand(payload)
 		end
