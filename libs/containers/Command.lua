@@ -15,29 +15,28 @@ local Option = require("containers/Option")
 
 local Command, get = class("Command", Snowflake)
 
-local function execute(self)
+function Command:_execute(self)
 	local payload = {
 		name = self._name, description = self._description,
 		default_member_permissions = self._default_member_permissions.value, dm_permission = self._dm_permission, default_permission = self._default_permission,
 		nsfw = self._nsfw,
 		options = {}
 	}
-	for i,v in self._options:iter() do
+	for i,v in ipairs(self._options) do
 		payload.options[i] = v:_raw()
 	end
 	local data
-	if self._new then
-		self._new = false
-		if self._guild then
-			data = self._client._api:createGuildApplicationCommand(self._guild, payload))
-		else
-			data = self._client._api:createGlobalApplicationCommand(payload)
-		end
-	else
+	if self._id then
 		if self._guild then
 			data = self._client._api:editGuildApplicationCommand(self._guild, self._id, payload)
 		else
 			data = self._client._api:editGlobalApplicationCommand(self._id, payload)
+		end
+	else
+		if self._guild then
+			data = self._client._api:createGuildApplicationCommand(self._guild, payload))
+		else
+			data = self._client._api:createGlobalApplicationCommand(payload)
 		end
 	end
 	self._id, self._version = data.id, data.version
@@ -47,7 +46,7 @@ end
 function Command:_queue()
 	if self._client._token then
 		timer.clearTimer(self._timer)
-		self._timer = timer.setImmediate(coroutine.wrap(execute), self)
+		self._timer = timer.setImmediate(coroutine.wrap(self._execute), self)
 	end
 end
 
@@ -81,14 +80,6 @@ function Command:__init( data, parent, client )
 	self:_setOptions( data )
 	
 	Snowflake.__init(self, data, parent)
-	
-	if not self._client._token then
-		self._client:on("ready", function()
-			self:_queue()
-		end)
-	else
-		self:_queue()
-	end
 end
 
 --[=[

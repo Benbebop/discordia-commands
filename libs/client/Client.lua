@@ -20,7 +20,7 @@ local Client = discordia.class.classes.Client
 @d Create or overwrite (if it already exists) a slash command. Providing a guild will make it a guild command, elsewise it will be a global command.
 ]=]
 function Client:newSlashCommand( name, guild )
-	local c = Command( {new = true, type = enum.applicationCommandType.chatInput, id = 0, guild = guild and Resolver.guild(guild).id, name = name}, self, self )
+	local c = Command( {type = enum.applicationCommandType.chatInput, guild = guild and Resolver.guild(guild).id, name = name}, self, self )
 	table.insert(self._commandTable, c)
 	return c
 end
@@ -33,7 +33,7 @@ end
 @d Create or overwrite (if it already exists) a user command. Providing a guild will make it a guild command, elsewise it will be a global command.
 ]=]
 function Client:newUserCommand( name, guild )
-	local c = Command( {new = true, type = enum.applicationCommandType.user, id = 0, guild = guild and Resolver.guild(guild).id, name = name}, self, self )
+	local c = Command( {type = enum.applicationCommandType.user, guild = guild and Resolver.guild(guild).id, name = name}, self, self )
 	table.insert(self._commandTable, c)
 	return c
 end
@@ -46,7 +46,7 @@ end
 @d Create or overwrite (if it already exists) a message command. Providing a guild will make it a guild command, elsewise it will be a global command.
 ]=]
 function Client:newMessageCommand( name, guild )
-	local c = Command( {new = true, type = enum.applicationCommandType.message, id = 0, _guild = guild and Resolver.guild(guild).id, name = name}, self, self )
+	local c = Command( {type = enum.applicationCommandType.message, _guild = guild and Resolver.guild(guild).id, name = name}, self, self )
 	table.insert(self._commandTable, c)
 	return c
 end
@@ -99,8 +99,7 @@ end
 local oldClientInit = Client.__init
 
 function Client:__init( ... )
-	self._commandTable = {}
-	self._commandCache = Cache( self._commandTable )
+	self._commandInit = {}
 	
 	self:on("ready", function()
 		self:cacheCommands()
