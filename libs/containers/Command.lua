@@ -19,9 +19,17 @@ local function execute(self)
 		options = {}
 	}
 	if self._new then
-		self._client._api:createGlobalApplicationCommand(payload)
+		if self._guild then
+			self._client._api:createGuildApplicationCommand(self._guild, payload)
+		else
+			self._client._api:createGlobalApplicationCommand(payload)
+		end
 	else
-		self._client._api:editGlobalApplicationCommand(self._id, payload)
+		if self._guild then
+			self._client._api:editGuildApplicationCommand(self._guild, self._id, payload)
+		else
+			self._client._api:editGlobalApplicationCommand(self._id, payload)
+		end
 	end
 end
 
@@ -37,15 +45,28 @@ end
 @p data table
 @d Manually overwrite command data with a raw table.
 ]=]
-function Command:overwrite( data, parent )
-	:_queue()
+function Command:overwrite( data )
 	if data.options then
 		data.options = ArrayIterable()
 	end
 	
-	Snowflake.__init(self, data, parent or self._parent)
+	self:_queue()
 end
-Command.__init = Command.overwrite
+
+function Command:__init( data, client, parent )
+	Snowflake.__init(self, data, parent)
+	self._client = client
+	
+	self:overwrite( data )
+	
+	if not self._client._token then
+		self._client:on("ready", function()
+			self:_queue()
+		end)
+	else
+		self:_queue()
+	end
+end
 
 --[=[
 @p guild number The command type. Use the applicationCommandType enumeration for a human-readable representation.
@@ -75,6 +96,8 @@ end
 ]=]
 function Command:setName( name )
 	
+	
+	self:_queue()
 end
 
 --[=[
@@ -91,6 +114,8 @@ end
 ]=]
 function Command:setDescription( description )
 	
+	
+	self:_queue()
 end
 
 --[=[ 
@@ -107,6 +132,8 @@ end
 ]=]
 function Command:setDefaultMemberPermissions( permissions )
 	
+	
+	self:_queue()
 end
 
 --[=[
@@ -123,6 +150,8 @@ end
 ]=]
 function Command:setDmPermission( hasDmPermission )
 	
+	
+	self:_queue()
 end
 
 --[=[
@@ -143,6 +172,8 @@ function Command:setDefaultPermission( hasDefaultPermission )
 	else
 		self._default_permission = hasDefaultPermission
 	end
+	
+	self:_queue()
 end
 
 --[=[
@@ -163,6 +194,8 @@ end
 ]=]
 function Command:setNsfw( isNsfw )
 	self._nsfw = isNsfw
+	
+	self:_queue()
 end
 
 --[=[
