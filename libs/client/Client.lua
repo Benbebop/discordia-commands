@@ -75,6 +75,8 @@ function Client:__init( ... )
 	self._commandInit = {}
 	self._commandCache = Cache( self._commandInit )
 	
+	local initResults = oldClientInit(self, ... )
+	
 	self:on("ready", function()
 		self._commandTable = self._commandInit self._commandInit = nil
 		local toRemove = {}
@@ -89,7 +91,7 @@ function Client:__init( ... )
 		self:cacheCommands()
 	end)
 	
-	return oldClientInit(self, ... )
+	return initResults
 end
 
 return Client
