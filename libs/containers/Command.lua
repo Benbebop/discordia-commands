@@ -38,6 +38,7 @@ end
 @d Manually overwrite command data with a raw table.
 ]=]
 function Command:overwrite( data, parent )
+	:_queue()
 	if data.options then
 		data.options = ArrayIterable()
 	end
@@ -68,9 +69,9 @@ function get.options(self)
 end
 
 --[=[
-@m overwrite
-@p data table
-@d Manually overwrite command data with a raw table.
+@m setName
+@p name string
+@d Se the command's name. This should be between 1 and 32 characters in length.
 ]=]
 function Command:setName( name )
 	
@@ -84,11 +85,11 @@ function get.name(self)
 end
 
 --[=[
-@m overwrite
-@p data table
-@d Manually overwrite command data with a raw table.
+@m setDescription
+@p description string
+@d Set the command's description. This should be between 1 and 100 characters in length. This only applies to chatInput commands.
 ]=]
-function Command:setDescription( name )
+function Command:setDescription( description )
 	
 end
 
@@ -100,27 +101,27 @@ function get.description(self)
 end
 
 --[=[
-@m overwrite
-@p data table
-@d Manually overwrite command data with a raw table.
+@m setDefaultMemberPermissions
+@p permissions Permissions
+@d Set permissions required to use this command. This only applies to guild commands.
 ]=]
-function Command:setDefaultMemberPermissions( name )
+function Command:setDefaultMemberPermissions( permissions )
 	
 end
 
 --[=[
-@p defaultMemberPermissions Permissions A Permissions object of permissions required to use this command. This only applies to guild commands.
+@p defaultMemberPermissions Permissions Permissions required to use this command. This only applies to guild commands.
 ]=]
 function get.defaultMemberPermissions(self)
 	return self._default_member_permissions
 end
 
 --[=[
-@m overwrite
-@p data table
+@m setDmPermission
+@p hasDmPermission boolean
 @d Manually overwrite command data with a raw table.
 ]=]
-function Command:setDmPermission( name )
+function Command:setDmPermission( hasDmPermission )
 	
 end
 
@@ -132,32 +133,36 @@ function get.dmPermission(self)
 end
 
 --[=[
-@m overwrite
-@p data table
-@d Manually overwrite command data with a raw table.
+@m setDefaultPermission
+@p hasDefaultPermission boolean
+@d Whether this command is enabled by default in a guild. This only applies to guild commands. Note: This is a soon depricated feature and should not be used.
 ]=]
-function Command:setDefaultPermission( name )
-	
+function Command:setDefaultPermission( hasDefaultPermission )
+	if self._default_permission == nil then
+		self._default_member_permissions = hasDefaultPermission and 0 or self._default_member_permissions
+	else
+		self._default_permission = hasDefaultPermission
+	end
 end
 
 --[=[
-@p defaultPermission boolean Whether this command is enabled by default in a guild. This only applies to guild commands. Note: This is a depricated feature and should not be used.
+@p defaultPermission boolean Whether this command is enabled by default in a guild. This only applies to guild commands.
 ]=]
 function get.defaultPermission(self)
 	if self._default_permission == nil then
-		return self._default_member_permissions == 0
+		return self._default_member_permissions ~= 0
 	else
 		return self._default_permission
 	end
 end
 
 --[=[
-@m overwrite
-@p data table
-@d Manually overwrite command data with a raw table.
+@m setNsfw
+@p isNsfw boolean
+@d Set whether this command is age-restricted.
 ]=]
-function Command:setDefaultPermission( name )
-	
+function Command:setNsfw( isNsfw )
+	self._nsfw = isNsfw
 end
 
 --[=[
