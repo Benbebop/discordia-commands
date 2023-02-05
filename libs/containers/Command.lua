@@ -16,6 +16,7 @@ local Option = require("containers/Option")
 local Command, get = class("Command", Snowflake)
 
 function Command:_execute(self)
+	self._timer = nil
 	local payload = {
 		name = self._name, description = self._description,
 		default_member_permissions = self._default_member_permissions.value, dm_permission = self._dm_permission, default_permission = self._default_permission,
@@ -44,8 +45,7 @@ function Command:_execute(self)
 end
 
 function Command:_queue()
-	if self._client._token then
-		timer.clearTimer(self._timer)
+	if self._client._token and not self._timer then
 		self._timer = timer.setImmediate(coroutine.wrap(self._execute), self)
 	end
 end
