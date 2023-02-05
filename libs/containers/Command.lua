@@ -8,7 +8,9 @@ local timer = require("timer")
 local class = discordia.class
 local Snowflake = class.classes.Snowflake
 local ArrayIterable = class.classes.ArrayIterable
+local Resolver = require("discordia/client/Client/Resolver")
 
+local Permissions = discordia.class.classes.Permissions
 local Option = require("containers/Option")
 
 local Command, get = class("Command", Snowflake)
@@ -16,7 +18,7 @@ local Command, get = class("Command", Snowflake)
 local function execute(self)
 	local payload = {
 		name = self._name, description = self._description,
-		default_member_permissions = self._default_member_permissions, dm_permission = self._dm_permission, default_permission = self._default_permission,
+		default_member_permissions = self._default_member_permissions.value, dm_permission = self._dm_permission, default_permission = self._default_permission,
 		nsfw = self._nsfw,
 		options = {}
 	}
@@ -59,7 +61,7 @@ end
 ]=]
 function Command:overwrite( data )
 	self._name, self._description = data.name, data.description
-	self._default_member_permissions, self._dm_permission, self._default_permission = data.default_member_permissions, data.dm_permission, data.default_permission
+	self._default_member_permissions, self._dm_permission, self._default_permission = Permissions(data.default_member_permissions), data.dm_permission, data.default_permission
 	self._nsfw = data.nsfw
 	self:_setOptions( data )
 	
@@ -141,20 +143,22 @@ end
 
 --[=[
 @m setDefaultMemberPermissions
-@p permissions Permissions
+@p permissions Permissions-Resolvable
 @d Set permissions required to use this command. This only applies to guild commands.
 ]=]
 function Command:setDefaultMemberPermissions( permissions )
-	self._default_member_permissions = permissions
+	self._default_member_permissions = Resolver.permission(permissions).value
 	
 	self:_queue()
 end
 
 --[=[
-@p defaultMemberPermissions Permissions Permissions required to use this command. This only applies to guild commands.
+@m getDefaultMemberPermissions
+@r Permissions-Resolvable
+@d Get permissions required to use this command. This only applies to guild commands.
 ]=]
-function get.defaultMemberPermissions(self)
-	return self._default_member_permissions
+function Command:getDefaultMemberPermissions()
+	return class.classes.Permissions(self._default_member_permissions)
 end
 
 --[=[
@@ -178,11 +182,11 @@ end
 --[=[
 @m setDefaultPermission
 @p hasDefaultPermission boolean
-@d Whether this command is enabled by default in a guild. This only applies to guild commands. Note: This is a soon depricated feature and should not be used.
+@d Whether this command is enabled by default in a guild. This only applies to guild commands. Note: This is a soon depricated feature, `Command.defaultMemberPermissions:disableAll()` should be used instead
 ]=]
 function Command:setDefaultPermission( hasDefaultPermission )
 	if self._default_permission == nil then
-		self._default_member_permissions = hasDefaultPermission and 0 or self._default_member_permissions
+		self._default_member_permissions = (not hasDefaultPermission) and 0 or self._default_member_permissions
 	else
 		self._default_permission = hasDefaultPermission
 	end
