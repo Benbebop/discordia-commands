@@ -109,7 +109,7 @@ end
 @d Se the command's name. This should be between 1 and 32 characters in length.
 ]=]
 function Command:setName( name )
-	
+	self._name = name
 	
 	self:_queue()
 end
@@ -127,7 +127,7 @@ end
 @d Set the command's description. This should be between 1 and 100 characters in length. This only applies to chatInput commands.
 ]=]
 function Command:setDescription( description )
-	
+	self._description = description
 	
 	self:_queue()
 end
@@ -145,7 +145,7 @@ end
 @d Set permissions required to use this command. This only applies to guild commands.
 ]=]
 function Command:setDefaultMemberPermissions( permissions )
-	
+	self._default_member_permissions = permissions
 	
 	self:_queue()
 end
@@ -163,7 +163,7 @@ end
 @d Manually overwrite command data with a raw table.
 ]=]
 function Command:setDmPermission( hasDmPermission )
-	
+	self._dm_permission = hasDmPermission
 	
 	self:_queue()
 end
