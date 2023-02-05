@@ -50,7 +50,7 @@ function Command:_setOptions( data )
 		for i,v in ipairs(data.options) do
 			options[i] = Option(v, self._client, self)
 		end
-		self._options = ArrayIterable()
+		self._options = ArrayIterable( options )
 	end
 end
 
