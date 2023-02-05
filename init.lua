@@ -1,4 +1,3 @@
 require("client/API")
 require("client/Client")
-
-return Client
+require("containers/Guild")
