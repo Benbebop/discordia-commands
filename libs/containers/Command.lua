@@ -254,4 +254,12 @@ function Command:compare( other )
 	return (self._type == other._type) and (self._guild == other._guild) and (self._name == other._name)
 end
 
+--[=[
+@m delete
+@d Deletes the command
+]=]
+function Command:delete( other )
+	
+end
+
 return Command
