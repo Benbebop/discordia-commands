@@ -59,7 +59,7 @@ end
 
 -- permissions --
 
-function API:getApplicationCommandPermissions(id)
+function API:getApplicationCommandsPermissions(guild_id)
 	return self:request("GET", f(endpoints.GLOBAL_COMMANDS_PERMISSIONS, id))
 end
 
