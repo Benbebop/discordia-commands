@@ -9,6 +9,8 @@ local class = discordia.class
 local Snowflake = class.classes.Snowflake
 local ArrayIterable = class.classes.ArrayIterable
 
+local Option = require("containers/Option")
+
 local Command, get = class("Command", Snowflake)
 
 local function execute(self)
@@ -40,24 +42,36 @@ function Command:_queue()
 	end
 end
 
+function Command:_setOptions( data )
+	if data.options then
+		local options = {}
+		for i,v in ipairs(data.options) do
+			options[i] = Option(v, self._client, self)
+		end
+		self._options = ArrayIterable()
+	end
+end
+
 --[=[
 @m overwrite
 @p data table
-@d Manually overwrite command data with a raw table.
+@d Overwrite command data with a raw table.
 ]=]
 function Command:overwrite( data )
-	if data.options then
-		data.options = ArrayIterable()
-	end
+	self._name, self._description = data.name, data.description
+	self._default_member_permissions, self._dm_permission, self._default_permission = data.default_member_permissions, data.dm_permission, data.default_permission
+	self._nsfw = data.nsfw
+	self:_setOptions( data )
 	
 	self:_queue()
 end
 
-function Command:__init( data, client, parent )
-	Snowflake.__init(self, data, parent)
-	self._client = client
+function Command:__init( data, parent )
+	self._client = parent._client
 	
-	self:overwrite( data )
+	self:_setOptions( data )
+	
+	Snowflake.__init(self, data, parent)
 	
 	if not self._client._token then
 		self._client:on("ready", function()
