@@ -2,6 +2,7 @@
 
 local discordia = require("discordia")
 local class = discordia.class
+local enum = discordia.enums
 
 local shared = {}
 
