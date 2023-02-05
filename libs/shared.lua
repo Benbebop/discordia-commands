@@ -1,8 +1,11 @@
 -- shared functions between Client and Guild, DRY and all
 
 local discordia = require("discordia")
+local Resolver = require("client/Resolver")
 local class = discordia.class
 local enum = discordia.enums
+
+local Command = require("containers/Command")
 
 local shared = {}
 
