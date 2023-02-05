@@ -22,6 +22,9 @@ local function execute(self)
 		nsfw = self._nsfw,
 		options = {}
 	}
+	for i,v in self._options:iter() do
+		payload.options[i] = v:_raw()
+	end
 	local data
 	if self._new then
 		self._new = false
