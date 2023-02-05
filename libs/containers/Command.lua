@@ -97,6 +97,26 @@ function get.guild(self)
 end
 
 --[=[
+@m addOption
+@r option Option
+@d Add a new option to the command. This only applies to chatInput commands.
+]=]
+function Command:addOption()
+	local o = Option( {}, self, self._client )
+	table.insert(self._options, o)
+	return o
+end
+
+--[=[
+@m addOption
+@p index number
+@d Remove an option from the command. This is the same as `table.remove(Command.options, index)`. This only applies to chatInput commands.
+]=]
+function Command:deleteOption( index )
+	table.remove(self._options, index)
+end
+
+--[=[
 @p options ArrayIterable An ArrayIterable of options for this command. This only applies to chatInput commands.
 ]=]
 function get.options(self)
@@ -106,7 +126,7 @@ end
 --[=[
 @m setName
 @p name string
-@d Se the command's name. This should be between 1 and 32 characters in length.
+@d Set the command's name. This should be between 1 and 32 characters in length.
 ]=]
 function Command:setName( name )
 	self._name = name
