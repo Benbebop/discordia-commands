@@ -98,7 +98,7 @@ end
 
 local oldClientInit = Client.__init
 
-function Client:__init()
+function Client:__init( ... )
 	self._commandTable = {}
 	self._commandCache = Cache( self._commandTable )
 	
@@ -106,7 +106,7 @@ function Client:__init()
 		self:cacheCommands()
 	end)
 	
-	return oldClientInit(self)
+	return oldClientInit(self, ... )
 end
 
 return Client
