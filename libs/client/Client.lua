@@ -20,7 +20,7 @@ local Client = discordia.class.classes.Client
 @d Create or overwrite (if it already exists) a slash command. Providing a guild will make it a guild command, elsewise it will be a global command.
 ]=]
 function Client:newSlashCommand( name, guild )
-	local c = Command( {type = enum.applicationCommandType.chatInput, guild = guild and Resolver.guild(guild).id, name = name}, self, self )
+	local c = Command( {type = enum.applicationCommandType.chatInput, guild = guild and Resolver.guildId(guild), name = name}, self, self )
 	table.insert(self._commandTable, c)
 	return c
 end
@@ -33,7 +33,7 @@ end
 @d Create or overwrite (if it already exists) a user command. Providing a guild will make it a guild command, elsewise it will be a global command.
 ]=]
 function Client:newUserCommand( name, guild )
-	local c = Command( {type = enum.applicationCommandType.user, guild = guild and Resolver.guild(guild).id, name = name}, self, self )
+	local c = Command( {type = enum.applicationCommandType.user, guild = guild and Resolver.guildId(guild), name = name}, self, self )
 	table.insert(self._commandTable, c)
 	return c
 end
@@ -46,7 +46,7 @@ end
 @d Create or overwrite (if it already exists) a message command. Providing a guild will make it a guild command, elsewise it will be a global command.
 ]=]
 function Client:newMessageCommand( name, guild )
-	local c = Command( {type = enum.applicationCommandType.message, _guild = guild and Resolver.guild(guild).id, name = name}, self, self )
+	local c = Command( {type = enum.applicationCommandType.message, _guild = guild and Resolver.guildId(guild), name = name}, self, self )
 	table.insert(self._commandTable, c)
 	return c
 end
@@ -86,7 +86,7 @@ end
 
 --[=[
 @m cacheCommands
-@d Get all commands and cache them. This will overwrite any changes made on the same event loop.
+@d Get all commands and cache them.
 ]=]
 function Client:cacheCommands()
 	local commands = self._api:getGlobalApplicationCommands()
