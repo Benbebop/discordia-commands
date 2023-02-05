@@ -15,7 +15,7 @@ local Option = require("containers/Option")
 
 local Command, get = class("Command", Snowflake)
 
-function Command:_execute(self)
+function Command:_execute()
 	self._timer = nil
 	local payload = {
 		name = self._name, description = self._description,
@@ -243,6 +243,15 @@ end
 
 function get.version(self)
 	return self._version
+end
+
+--[=[
+@m compare
+@p other Command
+@d Whether this command would overwrite the other when pushed to discord.
+]=]
+function Command:compare( other )
+	return (self._type == other._type) and (self._guild == other._guild) and (self._name == other._name)
 end
 
 return Command
