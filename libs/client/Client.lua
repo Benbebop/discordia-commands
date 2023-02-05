@@ -4,7 +4,7 @@
 ]=]
 
 local discordia = require("discordia")
-local Resolver = require("discordia/client/Client/Resolver")
+local Resolver = require("client/Resolver")
 local Cache = discordia.class.classes.Cache
 local enum = require("enums")
 local shared = require("shared")
@@ -84,7 +84,7 @@ function Client:__init( ... )
 				table.insert( toRemove, i )
 			end
 		end
-		for _,v in ipairs(toRemove) table.remove(self._commandTable, v) end
+		for _,v in ipairs(toRemove) do table.remove(self._commandTable, v) end
 		
 		self:cacheCommands()
 	end)

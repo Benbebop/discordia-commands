@@ -8,7 +8,7 @@ local timer = require("timer")
 local class = discordia.class
 local Snowflake = class.classes.Snowflake
 local ArrayIterable = class.classes.ArrayIterable
-local Resolver = require("discordia/client/Client/Resolver")
+local Resolver = require("client/Resolver")
 
 local Permissions = discordia.class.classes.Permissions
 local Option = require("containers/Option")

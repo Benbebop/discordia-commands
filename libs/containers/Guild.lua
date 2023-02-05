@@ -4,7 +4,7 @@
 ]=]
 
 local discordia = require("discordia")
-local Resolver = require("discordia/client/Client/Resolver")
+local Resolver = require("client/Resolver")
 local Cache = discordia.class.classes.Cache
 local enum = require("enums")
 local shared = require("shared")
