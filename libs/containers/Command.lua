@@ -11,6 +11,27 @@ local ArrayIterable = class.classes.ArrayIterable
 
 local Command, get = class("Command", Snowflake)
 
+local function execute(self)
+	local payload = {
+		name = self._name, description = self._description,
+		default_member_permissions = self._default_member_permissions, dm_permission = self._dm_permission, default_permission = self._default_permission,
+		nsfw = self._nsfw,
+		options = {}
+	}
+	if self._new then
+		self._client._api:createGlobalApplicationCommand(payload)
+	else
+		self._client._api:editGlobalApplicationCommand(self._id, payload)
+	end
+end
+
+function Command:_queue()
+	if self._client._token then
+		timer.clearTimer(self._timer)
+		self._timer = timer.setImmediate(coroutine.wrap(execute), self)
+	end
+end
+
 --[=[
 @m overwrite
 @p data table
@@ -24,15 +45,6 @@ function Command:overwrite( data, parent )
 	Snowflake.__init(self, data, parent or self._parent)
 end
 Command.__init = Command.overwrite
-
-local function execute(self)
-	
-end
-
-function Command:_queue()
-	timer.clearTimer(self._timer)
-	self._timer = timer.setImmediate(execute, self)
-end
 
 --[=[
 @p guild number The command type. Use the applicationCommandType enumeration for a human-readable representation.
