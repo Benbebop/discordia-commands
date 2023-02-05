@@ -22,19 +22,23 @@ local function execute(self)
 		nsfw = self._nsfw,
 		options = {}
 	}
+	local data
 	if self._new then
+		self._new = false
 		if self._guild then
-			self._client._api:createGuildApplicationCommand(self._guild, payload)
+			data = self._client._api:createGuildApplicationCommand(self._guild, payload))
 		else
-			self._client._api:createGlobalApplicationCommand(payload)
+			data = self._client._api:createGlobalApplicationCommand(payload)
 		end
 	else
 		if self._guild then
-			self._client._api:editGuildApplicationCommand(self._guild, self._id, payload)
+			data = self._client._api:editGuildApplicationCommand(self._guild, self._id, payload)
 		else
-			self._client._api:editGlobalApplicationCommand(self._id, payload)
+			data = self._client._api:editGlobalApplicationCommand(self._id, payload)
 		end
 	end
+	self._id, self._version = data.id, data.version
+	self:overwrite( data )
 end
 
 function Command:_queue()
@@ -68,8 +72,8 @@ function Command:overwrite( data )
 	self:_queue()
 end
 
-function Command:__init( data, parent )
-	self._client = parent._client
+function Command:__init( data, parent, client )
+	self._client = client or parent._client
 	
 	self:_setOptions( data )
 	
