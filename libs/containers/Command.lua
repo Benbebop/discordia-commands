@@ -19,13 +19,13 @@ function Command:_execute()
 	self._timer = nil
 	local payload = {
 		name = self._name, description = self._description,
-		default_member_permissions = self._default_member_permissions.value, dm_permission = self._dm_permission, default_permission = self._default_permission,
+		default_member_permissions = (self._default_member_permissions or {}).value, dm_permission = self._dm_permission, default_permission = self._default_permission,
 		nsfw = self._nsfw,
 		options = {}
 	}
-	for i,v in ipairs(self._options) do
+	--[[for i,v in ipairs(self._options) do
 		payload.options[i] = v:_raw()
-	end
+	end]]
 	local data
 	if self._id then
 		if self._guild then
