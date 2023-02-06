@@ -51,8 +51,8 @@ function shared.cacheCommands( self )
 	for _,command in ipairs(commands) do
 		local c = Command( command, self, self )
 		for i,other in ipairs(self._commandTable) do
-			if other._id then if self._id == other._id then self._commandTable[i] = other return end
-			elseif self:compare(other) then return end
+			if other._id then if c._id == other._id then self._commandTable[i] = other return end
+			elseif c:compare(other) then return end
 		end
 		table.insert(self._commandTable, c)
 	end
