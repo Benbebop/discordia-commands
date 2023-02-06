@@ -79,6 +79,9 @@ function Client:__init( ... )
 	
 	self:on("ready", function()
 		self._commandTable = self._commandInit self._commandInit = nil
+		
+		self:cacheCommands()
+		
 		local toRemove = {}
 		for i,v in ipairs(self._commandTable) do
 			v:_execute()
@@ -88,8 +91,6 @@ function Client:__init( ... )
 			end
 		end
 		for _,v in ipairs(toRemove) do table.remove(self._commandTable, v) end
-		
-		self:cacheCommands()
 	end)
 	
 	return initResults
