@@ -29,19 +29,23 @@ function Command:_execute()
 	local data
 	if self._id then
 		if self._guild then
+			p("test1")
 			data = self._client._api:editGuildApplicationCommand(self._guild, self._id, payload)
 		else
+			p("test2")
 			data = self._client._api:editGlobalApplicationCommand(self._id, payload)
 		end
 	else
 		if self._guild then
+			p("test3")
 			data = self._client._api:createGuildApplicationCommand(self._guild, payload)
 		else
+			p("test4")
 			data = self._client._api:createGlobalApplicationCommand(payload)
 		end
 	end
 	self._id, self._version = data.id, data.version
-	self:overwrite( data )
+	self:_save( data )
 end
 
 function Command:_queue()
@@ -60,16 +64,20 @@ function Command:_setOptions( data )
 	end
 end
 
+function Command:_save( data )
+	self._name, self._description = data.name, data.description
+	self._default_member_permissions, self._dm_permission, self._default_permission = Permissions(data.default_member_permissions), data.dm_permission, data.default_permission
+	self._nsfw = data.nsfw
+	self:_setOptions( data )
+end
+
 --[=[
 @m overwrite
 @p data table
 @d Overwrite command data with a raw table.
 ]=]
 function Command:overwrite( data )
-	self._name, self._description = data.name, data.description
-	self._default_member_permissions, self._dm_permission, self._default_permission = Permissions(data.default_member_permissions), data.dm_permission, data.default_permission
-	self._nsfw = data.nsfw
-	self:_setOptions( data )
+	self:_save( data )
 	
 	self:_queue()
 end
