@@ -37,6 +37,7 @@ local client = discordia.Client()
 
 local command = client:newSlashCommand( "Say" )
 command:setDescription( "Make the bot say something cool" )
+local option = command:addOption()
 
 command = client:newUserCommand( "Hello" )
 command:setDescription( "Make the bot say hello" )

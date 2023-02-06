@@ -29,18 +29,14 @@ function Command:_execute()
 	local data
 	if self._id then
 		if self._guild then
-			p("test1")
 			data = self._client._api:editGuildApplicationCommand(self._guild, self._id, payload)
 		else
-			p("test2")
 			data = self._client._api:editGlobalApplicationCommand(self._id, payload)
 		end
 	else
 		if self._guild then
-			p("test3")
 			data = self._client._api:createGuildApplicationCommand(self._guild, payload)
 		else
-			p("test4")
 			data = self._client._api:createGlobalApplicationCommand(payload)
 		end
 	end
