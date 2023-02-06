@@ -42,11 +42,11 @@ function Client:newMessageCommand( name, guild ) return shared.newCommand( guild
 
 --[=[
 @m getCommand
-@p id string
+@p id Command-Id-Resolvable
 @r Command
 @d Get a global command.
 ]=]
-function Client:getGlobalCommand( id ) return shared.getCommand( self, id ) end
+function Client:getGlobalCommand( id ) return shared.getCommand( self, Resolver.commandId( id ) ) end
 
 --[=[
 @m getCommand
@@ -54,7 +54,7 @@ function Client:getGlobalCommand( id ) return shared.getCommand( self, id ) end
 @r Command
 @d Get a global command.
 ]=]
-function Client:deleteGlobalCommand( id ) shared.deleteCommand( self, id ) end
+function Client:deleteGlobalCommand( id ) shared.deleteCommand( self, Resolver.commandId( id ) ) end
 
 --[=[ 
 @p applicationCommands Cache All global commands currently cached to the client. This also contains guild commands if the client has not been run yet. Note: This is not updated by gateway events, you can request an update by using `Client:cacheCommands()`.

@@ -132,6 +132,13 @@ function Resolver.roleIds(objs)
 	return ret
 end
 
+function Resolver.commandId(obj)
+	if isInstance(obj, classes.Command) then
+		return obj.id
+	end
+	return int(obj)
+end
+
 function Resolver.emoji(obj)
 	if isInstance(obj, classes.Emoji) then
 		return obj.hash
