@@ -15,10 +15,12 @@ function Command:_execute()
 		name = self._name, description = self._description,
 		default_member_permissions = (self._default_member_permissions or {}).value, dm_permission = self._dm_permission, default_permission = self._default_permission,
 		nsfw = self._nsfw,
-		options = {}
+		options = self._options and {}
 	}
-	for i,v in ipairs(self._options) do
-		payload.options[i] = v:_raw()
+	if self._options then
+		for i,v in ipairs(self._options) do
+			payload.options[i] = v:_raw()
+		end
 	end
 	local data
 	if self._id then
@@ -48,9 +50,9 @@ function Command:_setOptions( data )
 	if data.options then
 		local options = {}
 		for i,v in ipairs(data.options) do
-			options[i] = Option(v, self._client, self)
+			options[i] = Option(v, self._client, self, self)
 		end
-		self._options = ArrayIterable( options )
+		self._options = options
 	end
 end
 
@@ -83,14 +85,17 @@ function get.guild(self)
 	return self._client:getGuild( self._guild )
 end
 
-function Command:addOption( optionType )
-	local o = Option( {type = optionType}, self, self, self._client )
+function Command:addOption( optionType, name )
+	local o = Option( {type = optionType, name = name}, self, self, self._client )
+	self._options = self._options or {}
 	table.insert(self._options, o)
 	return o
 end
 
 function Command:deleteOption( index )
 	table.remove(self._options, index)
+	
+	self:_queue()
 end
 
 function get.options(self)

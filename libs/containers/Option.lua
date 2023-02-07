@@ -11,15 +11,19 @@ function Option:_raw()
 		type = self._type,
 		name = self._name, description = self._description,
 		required = not not self._required,
-		choices = {}, options =  {}, channel_types = self._channel_types
+		choices = self._choices and {}, options = self._choices and {}, channel_types = self._channel_types,
 		min_value = self._min_value, max_value = self._max_value, min_length = self._min_length, max_length = self._max_length,
 		autocomplete = not not self._autocomplete
 	}
-	for i,v in ipairs(self._choices) do
-		payload.choices[i] = v:_raw()
+	if self._choices then
+		for i,v in ipairs(self._choices) do
+			payload.choices[i] = v:_raw()
+		end
 	end
-	for i,v in ipairs(self._options) do
-		payload.options[i] = v:_raw()
+	if self._options then
+		for i,v in ipairs(self._options) do
+			payload.options[i] = v:_raw()
+		end
 	end
 	return payload
 end
@@ -45,7 +49,7 @@ function get.name(self)
 end
 
 function Option:setDescription( description )
-	self._description = name
+	self._description = description
 	
 	self._command:_queue()
 end
@@ -66,6 +70,7 @@ end
 
 function Option:addChoice()
 	local o = Choice( {}, self, self._client )
+	self._choices = self._choices or {}
 	table.insert(self._choices, o)
 	return o
 end
@@ -81,7 +86,8 @@ function get.choices(self)
 end
 
 function Option:addOption()
-	local o = Option( {}, self, self._client )
+	local o = Option( {}, self, self._command, self._client )
+	self._options = self._options or {}
 	table.insert(self._options, o)
 	return o
 end
@@ -97,6 +103,7 @@ function get.options(self)
 end
 
 function Option:setChannelType( channelType, isShown )
+	self._channel_types = self._channel_types or {}
 	local exists = false
 	for i,v in ipairs(self._channel_types) do
 		if v == channelType then
