@@ -7,7 +7,6 @@ local discordia = require("discordia")
 local timer = require("timer")
 local class = discordia.class
 local Snowflake = class.classes.Snowflake
-local ArrayIterable = class.classes.ArrayIterable
 local Resolver = require("client/Resolver")
 
 local Permissions = discordia.class.classes.Permissions
@@ -23,9 +22,9 @@ function Command:_execute()
 		nsfw = self._nsfw,
 		options = {}
 	}
-	--[[for i,v in ipairs(self._options) do
+	for i,v in ipairs(self._options) do
 		payload.options[i] = v:_raw()
-	end]]
+	end
 	local data
 	if self._id then
 		if self._guild then
@@ -87,7 +86,7 @@ function Command:__init( data, parent, client )
 end
 
 --[=[
-@p guild number The command type. Use the applicationCommandType enumeration for a human-readable representation.
+@p type number The command type. Use the applicationCommandType enumeration for a human-readable representation.
 ]=]
 function get.type(self)
 	return self._type
@@ -102,17 +101,18 @@ end
 
 --[=[
 @m addOption
-@r option Option
+@p optionType number
+@r Option
 @d Add a new option to the command. This only applies to chatInput commands.
 ]=]
-function Command:addOption()
-	local o = Option( {}, self, self._client )
+function Command:addOption( optionType )
+	local o = Option( {type = optionType}, self, self, self._client )
 	table.insert(self._options, o)
 	return o
 end
 
 --[=[
-@m addOption
+@m deleteOption
 @p index number
 @d Remove an option from the command. This is the same as `table.remove(Command.options, index)`. This only applies to chatInput commands.
 ]=]
@@ -121,7 +121,7 @@ function Command:deleteOption( index )
 end
 
 --[=[
-@p options ArrayIterable An ArrayIterable of options for this command. This only applies to chatInput commands.
+@p options table A table of options for this command. This only applies to chatInput commands.
 ]=]
 function get.options(self)
 	return self._options
