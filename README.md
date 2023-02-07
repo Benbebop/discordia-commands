@@ -32,17 +32,18 @@ Here is a quick example to get a general idea of how this library works.
 ```lua
 local discordia = require("discordia")
 require("discordia-commands")
+local enums = discordia.enums
 
 local client = discordia.Client()
 
-local command = client:newSlashCommand( "Say" )
-command:setDescription( "Make the bot say something cool" )
-local option = command:addOption()
-
-command = client:newUserCommand( "Hello" )
-command:setDescription( "Make the bot say hello" )
+local dl = client:newSlashCommand( "say" )
+dl:setDescription( "Make the bot say something cool" )
+local o = dl:addOption( enums.applicationCommandOptionType.string, "content" )
+o:setDescription( "What you want to make the bot say" )
+o:setRequired( true )
 
 client:run("Bot " .. TOKEN)
 ```
+*still working on callbacks for commands, you will have to make them yourself*
 
-For further functionality, see the wiki, in which everything should be fully documented.
+For further functionality, see the wiki.
