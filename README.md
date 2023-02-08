@@ -47,3 +47,7 @@ client:run("Bot " .. TOKEN)
 *still working on callbacks for commands, you will have to make them yourself*
 
 For further functionality, see the wiki.
+
+# Help
+
+If you encounter any issues, you can dm or ping me in the [discordia server](https://discord.gg/EzRYYDW) at [Benbebop#7867](https://discord.gg/users/459880024187600937).
