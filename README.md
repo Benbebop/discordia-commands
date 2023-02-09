@@ -48,7 +48,6 @@ end)
 
 client:run("Bot " .. TOKEN)
 ```
-*still working on callbacks for commands, you will have to make them yourself*
 
 For further functionality, see the wiki.
 
