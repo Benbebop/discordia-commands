@@ -31,6 +31,7 @@ Here is a quick example to get a general idea of how this library works.
 
 ```lua
 local discordia = require("discordia")
+require("discordia-interactions")
 require("discordia-commands")
 local enums = discordia.enums
 
