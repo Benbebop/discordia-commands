@@ -43,8 +43,8 @@ local o = dl:addOption( enums.applicationCommandOptionType.string, "content" )
 o:setDescription( "What you want to make the bot say" )
 o:setRequired( true )
 
-dl:callback(function(interaction)
-	interaction:reply(interaction.data.options[1].value, true)
+dl:callback(function(interaction, args)
+	interaction:reply(args.content, true)
 end)
 
 client:run("Bot " .. TOKEN)
