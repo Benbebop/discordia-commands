@@ -23,4 +23,10 @@ enums.applicationCommandOptionType = {
 	attachment = 11
 }
 
+enums.applicationCommandPermissionType = {
+	role = 1,
+	user = 2,
+	channel = 3
+}
+
 return enums
