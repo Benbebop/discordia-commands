@@ -28,13 +28,17 @@ function shared.deleteCommand( self, id )
 	c:delete()
 end
 
-function shared.getCommand( self, id )
-	local c = self._commandCache:find(function(c) return c.id == id end)
+function shared.getCommand( self, command )
+	command = Resolver.commandId( command )
+	local c
+	for _,v in ipairs(self._commandTable) do
+		if v.id == command then c = v break end
+	end
 	if not c then
 		if class.isInstance( self, class.classes.Guild ) then
-			c = Command( self._api:getGlobalApplicationCommand(id), self, self._client )
+			c = Command( self._api:getGlobalApplicationCommand(command), self, self._client )
 		else
-			c = Command( self._api:getGlobalApplicationCommand(id), self, self )
+			c = Command( self._api:getGlobalApplicationCommand(command), self, self )
 		end
 		table.insert(self._commandTable, c)
 	end

@@ -1,7 +1,7 @@
 local discordia = require("discordia")
 local Resolver = require("client/Resolver")
 local Cache = discordia.class.classes.Cache
-local enum = require("enums")
+local enums = discordia.enums
 local shared = require("shared")
 
 local Command = require("containers/Command")
@@ -48,8 +48,19 @@ function Client:__init( ... )
 		for _,v in ipairs(toRemove) do table.remove(self._commandTable, v) end
 	end)
 	
-	self:on("interactionCreate", function( ... )
-		p( ... )
+	self:on("interactionCreate", function( interaction )
+		if interaction.type ~= enums.interactionType.applicationCommand then return end
+		local data = interaction.data
+		local command
+		if data.guild_id then
+			command = self:getGuild( data.guild_id ):getGuildCommand( data.id )
+		else
+			command = self:getGlobalCommand( data.id )
+		end
+		if (not command) or (not command._listeners) then self:warning("Unhandled command event: %s", interaction.data.name) return end
+		for _,v in ipairs( command._listeners ) do
+			coroutine.wrap(v)( interaction )
+		end
 	end)
 	
 	return initResults

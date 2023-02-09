@@ -182,4 +182,9 @@ function Command:delete( other )
 	
 end
 
+function Command:callback( callback )
+	self._listeners = self._listeners or {}
+	table.insert(self._listeners, callback)
+end
+
 return Command
