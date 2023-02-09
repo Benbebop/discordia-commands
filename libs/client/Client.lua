@@ -58,10 +58,13 @@ function Client:__init( ... )
 			command = self:getGlobalCommand( data.id )
 		end
 		if (not command) or (not command._listeners) then self:warning("Unhandled command event: %s", interaction.data.name) return end
-		local args, argsOrdered = {}, {}
-		for i,v in ipairs(interaction.data.options) do
-			argsOrdered[i] = v.value
-			args[v.name] = v.value
+		local args, argsOrdered
+		if interaction.data.type == enums.applicationCommandType.chatInput then
+			args, argsOrdered = {}, {}
+			for i,v in ipairs(interaction.data.options) do
+				argsOrdered[i] = v.value
+				args[v.name] = v.value
+			end
 		end
 		for _,v in ipairs( command._listeners ) do
 			coroutine.wrap(v)( interaction, args, argsOrdered )
