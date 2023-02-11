@@ -9,7 +9,7 @@ I won't be putting this on Lit, so you will have to clone it.
 1. Follow the instructions for installing [Discordia](https://github.com/SinisterRectus/Discordia).
 2. Also install [Discordia Interactions](https://github.com/Bilal2453/discordia-interactions). (not required but highly recommended)
 3. `cd` into your bot directory.
-4. Then run `git clone https://github.com/Benbebop/discordia-commands ./deps/discordia-commands`
+4. Then run `git clone https://github.com/Benbebop/discordia-commands.git ./deps/discordia-commands`
 
 You should then have a folder named `discordia-commands` in your deps folder.
 
