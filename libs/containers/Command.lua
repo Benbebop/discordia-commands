@@ -67,6 +67,8 @@ function Command:overwrite( data )
 	self:_save( data )
 	
 	self:_queue()
+	
+	return self
 end
 
 function Command:__init( data, parent, client )
@@ -96,6 +98,8 @@ function Command:deleteOption( index )
 	table.remove(self._options, index)
 	
 	self:_queue()
+	
+	return self
 end
 
 function get.options(self)
@@ -106,6 +110,7 @@ function Command:setName( name )
 	self._name = name
 	
 	self:_queue()
+	return self
 end
 
 function get.name(self)
@@ -116,6 +121,8 @@ function Command:setDescription( description )
 	self._description = description
 	
 	self:_queue()
+	
+	return self
 end
 
 function get.description(self)
@@ -126,6 +133,8 @@ function Command:setDefaultMemberPermissions( permissions )
 	self._default_member_permissions = Resolver.permission(permissions).value
 	
 	self:_queue()
+	
+	return self
 end
 
 function Command:getDefaultMemberPermissions()
@@ -136,6 +145,8 @@ function Command:setDmPermission( hasDmPermission )
 	self._dm_permission = hasDmPermission
 	
 	self:_queue()
+	
+	return self
 end
 
 function get.dmPermission(self)
@@ -150,6 +161,8 @@ function Command:setDefaultPermission( hasDefaultPermission )
 	end
 	
 	self:_queue()
+	
+	return self
 end
 
 function get.defaultPermission(self)
@@ -164,6 +177,8 @@ function Command:setNsfw( isNsfw )
 	self._nsfw = isNsfw
 	
 	self:_queue()
+	
+	return self
 end
 
 function get.nsfw(self)
@@ -180,11 +195,15 @@ end
 
 function Command:delete( other )
 	
+	
+	return self
 end
 
 function Command:callback( callback )
 	self._listeners = self._listeners or {}
 	table.insert(self._listeners, callback)
+	
+	return self
 end
 
 return Command

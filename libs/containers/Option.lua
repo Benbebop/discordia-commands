@@ -42,6 +42,8 @@ function Option:setName( name )
 	self._name = name
 	
 	self._command:_queue()
+	
+	return self
 end
 
 function get.name(self)
@@ -52,6 +54,8 @@ function Option:setDescription( description )
 	self._description = description
 	
 	self._command:_queue()
+	
+	return self
 end
 
 function get.description(self)
@@ -62,6 +66,8 @@ function Option:setRequired( isRequired )
 	self._required = isRequired
 	
 	self._command:_queue()
+	
+	return self
 end
 
 function get.required(self)
@@ -79,6 +85,8 @@ function Option:deleteChoice( index )
 	table.remove(self._choices, index)
 	
 	self._command:_queue()
+	
+	return self
 end
 
 function get.choices(self)
@@ -96,6 +104,8 @@ function Option:deleteOption( index )
 	table.remove(self._options, index)
 	
 	self._command:_queue()
+	
+	return self
 end
 
 function get.options(self)
@@ -113,6 +123,8 @@ function Option:setChannelType( channelType, isShown )
 	if not exists then table.insert( self._channel_types, channelType ) end
 	
 	self._command:_queue()
+	
+	return self
 end
 
 function get.channelTypes(self)
@@ -123,6 +135,8 @@ function Option:setMinValue( value )
 	self._min_value = value
 	
 	self._command:_queue()
+	
+	return self
 end
 
 function get.minValue(self)
@@ -143,6 +157,8 @@ end
 
 function Option:autocomplete( callback )
 	self._autocomplete = callback
+	
+	return self
 end
 
 return Option
