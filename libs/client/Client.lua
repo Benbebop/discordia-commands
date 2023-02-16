@@ -27,14 +27,12 @@ function Client:cacheCommands() shared.cacheCommands(self) end
 local oldClientInit = Client.__init
 
 function Client:__init( ... )
-	self._commandInit = {}
-	self._commandCache = Cache( self._commandInit )
+	self._commandTable = {}
+	self._commandCache = Cache( self._commandTable )
 	
 	local initResults = oldClientInit(self, ... )
 	
 	self:on("ready", function()
-		self._commandTable = self._commandInit self._commandInit = nil
-		
 		self:cacheCommands()
 		
 		local toRemove = {}

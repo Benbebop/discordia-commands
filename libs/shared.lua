@@ -10,16 +10,15 @@ local Command = require("containers/Command")
 local shared = {}
 
 function shared.newCommand( self, client, commandType, name, overwriteGuild )
-	local tblIndex = self._commandInit and "_commandInit" or "_commandTable"
 	local c = Command( {type = enum.applicationCommandType[cType], guild = Resolver.guildId(overwriteGuild or self), name = name}, self, client )
 	local exists = false
-	for i,other in ipairs(self[tblIndex]) do
+	for i,other in ipairs(self._commandTable) do
 		if c:compare(other) then
-			self[tblIndex][i] = c
+			self._commandTable[i] = c
 			exists = true
 		end
 	end
-	if not exists then table.insert(self[tblIndex], c) end
+	if not exists then table.insert(self._commandTable, c) end
 	return c
 end
 
@@ -36,7 +35,7 @@ function shared.getCommand( self, command )
 	end
 	if not c then
 		if class.isInstance( self, class.classes.Guild ) then
-			c = Command( self._api:getGlobalApplicationCommand(command), self, self._client )
+			c = Command( self._client._api:getGlobalApplicationCommand(command), self, self._client )
 		else
 			c = Command( self._api:getGlobalApplicationCommand(command), self, self )
 		end
@@ -48,7 +47,7 @@ end
 function shared.cacheCommands( self )
 	local commands
 	if class.isInstance( self, class.classes.Guild ) then
-		commands = self._api:getGuildApplicationCommands( self._id )
+		commands = self._client._api:getGuildApplicationCommands( self._id )
 	else
 		commands = self._api:getGlobalApplicationCommands()
 	end
