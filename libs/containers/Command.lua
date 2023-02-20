@@ -185,7 +185,7 @@ function Command:delete()
 		self.client._api:deleteGlobalApplicationCommand(self._id)
 	end
 	
-	self._cache:_delete( self._id )
+	self._parent._applicationCommands:_delete( self._id )
 end
 
 return Command
