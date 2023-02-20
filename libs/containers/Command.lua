@@ -1,82 +1,66 @@
 local discordia = require("discordia")
 local timer = require("timer")
-local class = discordia.class
-local Snowflake = class.classes.Snowflake
 local Resolver = require("client/Resolver")
+local class = discordia.class
 
+local Snowflake = class.classes.Snowflake
 local Permissions = discordia.class.classes.Permissions
 local Option = require("containers/Option")
 
 local Command, get = class("Command", Snowflake)
 
-function Command:_execute()
-	self._timer = nil
+local function queue( self )
+	if self._queued then return end
+	self.client:_queueCommands()
+	table.insert(self.client._applicationCommandsModified, self)
+	self._queued = true
+end
+
+function Command:_payload()
 	local payload = {
+		type = self._type, name = self._name, guild = Resolver.guildId( self._guild ),
 		name = self._name, description = self._description,
-		default_member_permissions = (self._default_member_permissions or {}).value, dm_permission = self._dm_permission, default_permission = self._default_permission,
-		nsfw = self._nsfw,
-		options = self._options and {}
+		nsfw = self._nsfw
 	}
+	
 	if self._options then
+		payload.options = {}
+		
 		for i,v in ipairs(self._options) do
-			payload.options[i] = v:_raw()
+			payload.options[i] = v:_payload()
 		end
 	end
-	local data
-	if self._id then
-		if self._guild then
-			data = self._client._api:editGuildApplicationCommand(self._guild, self._id, payload)
-		else
-			data = self._client._api:editGlobalApplicationCommand(self._id, payload)
-		end
-	else
-		if self._guild then
-			data = self._client._api:createGuildApplicationCommand(self._guild, payload)
-		else
-			data = self._client._api:createGlobalApplicationCommand(payload)
-		end
-	end
-	self._id, self._version = data.id, data.version
-	self:_save( data )
+	
+	return payload
 end
 
-function Command:_queue()
-	if self._client._token and not self._timer then
-		self._timer = timer.setImmediate(coroutine.wrap(self._execute), self)
-	end
-end
-
-function Command:_setOptions( data )
+function Command:_load( data )
+	self._id = self._id or data.id
+	self._name, self._description = data.name, data.description
+	self._default_member_permissions, self._dm_permission, self._default_permission = Permissions(data.default_member_permissions), data.dm_permission, data.default_permission
+	self._nsfw = data.nsfw
 	if data.options then
+		self._options = self._options or {}
 		local options = {}
 		for i,v in ipairs(data.options) do
-			options[i] = Option(v, self._client, self, self)
+			options[i] = self._options[i] and self._options[i]:overwrite(v) or Option(v, self, self)
 		end
 		self._options = options
 	end
 end
 
-function Command:_save( data )
-	self._name, self._description = data.name, data.description
-	self._default_member_permissions, self._dm_permission, self._default_permission = Permissions(data.default_member_permissions), data.dm_permission, data.default_permission
-	self._nsfw = data.nsfw
-	self:_setOptions( data )
+function Command:__init( data, parent )
+	self._type, self._guild = data.type, data.guild
+	
+	Snowflake.__init(self, {}, parent)
+	
+	self:_load( data )
+	
+	queue( self )
 end
 
-function Command:overwrite( data )
-	self:_save( data )
-	
-	self:_queue()
-	
-	return self
-end
-
-function Command:__init( data, parent, client )
-	self._client = client or parent._client
-	
-	self:_setOptions( data )
-	
-	Snowflake.__init(self, data, parent)
+function get.id(self)
+	return self._id
 end
 
 function get.type(self)
@@ -84,20 +68,21 @@ function get.type(self)
 end
 
 function get.guild(self)
-	return self._client:getGuild( self._guild )
+	return self.client:getGuild( self._guild )
 end
 
 function Command:addOption( optionType, name )
-	local o = Option( {type = optionType, name = name}, self, self, self._client )
+	local o = Option( {type = optionType, name = name}, self, self, self.client )
 	self._options = self._options or {}
 	table.insert(self._options, o)
+	queue( self )
 	return o
 end
 
 function Command:deleteOption( index )
 	table.remove(self._options, index)
 	
-	self:_queue()
+	queue( self )
 	
 	return self
 end
@@ -109,7 +94,7 @@ end
 function Command:setName( name )
 	self._name = name
 	
-	self:_queue()
+	queue( self )
 	return self
 end
 
@@ -120,7 +105,7 @@ end
 function Command:setDescription( description )
 	self._description = description
 	
-	self:_queue()
+	queue( self )
 	
 	return self
 end
@@ -132,7 +117,7 @@ end
 function Command:setDefaultMemberPermissions( permissions )
 	self._default_member_permissions = Resolver.permission(permissions).value
 	
-	self:_queue()
+	queue( self )
 	
 	return self
 end
@@ -144,7 +129,7 @@ end
 function Command:setDmPermission( hasDmPermission )
 	self._dm_permission = hasDmPermission
 	
-	self:_queue()
+	queue( self )
 	
 	return self
 end
@@ -160,7 +145,7 @@ function Command:setDefaultPermission( hasDefaultPermission )
 		self._default_permission = hasDefaultPermission
 	end
 	
-	self:_queue()
+	queue( self )
 	
 	return self
 end
@@ -176,7 +161,7 @@ end
 function Command:setNsfw( isNsfw )
 	self._nsfw = isNsfw
 	
-	self:_queue()
+	queue( self )
 	
 	return self
 end
@@ -190,20 +175,17 @@ function get.version(self)
 end
 
 function Command:compare( other )
-	return (self._type == other._type) and (self._guild == other._guild) and (self._name == other._name)
+	return (self._type == (other._type or other.type)) and (self._guild == (other._guild or other.guild)) and (self._name == (other._name or other.name))
 end
 
-function Command:delete( other )
+function Command:delete()
+	if self._guild then
+		self.client._api:deleteGuildApplicationCommand(self._guild, self._id)
+	else
+		self.client._api:deleteGlobalApplicationCommand(self._id)
+	end
 	
-	
-	return self
-end
-
-function Command:callback( callback )
-	self._listeners = self._listeners or {}
-	table.insert(self._listeners, callback)
-	
-	return self
+	self._cache:_delete( self._id )
 end
 
 return Command

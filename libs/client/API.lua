@@ -27,8 +27,8 @@ function API:deleteGlobalApplicationCommand(id)
 	return self:request("DELETE", f(endpoints.GLOBAL_COMMAND, self._client.user.id, id))
 end
 
-function API:bulkOverwriteGlobalApplicationCommands(id, payload)
-	return self:request("PUT", f(endpoints.GLOBAL_COMMANDS, self._client.user.id, id), payload)
+function API:bulkOverwriteGlobalApplicationCommands(payload)
+	return self:request("PUT", f(endpoints.GLOBAL_COMMANDS, self._client.user.id), payload)
 end
 
 -- guild commands --
@@ -53,8 +53,8 @@ function API:deleteGuildApplicationCommand(guild_id, command_id)
 	return self:request("DELETE", f(endpoints.GUILD_COMMAND, self._client.user.id, guild_id, command_id))
 end
 
-function API:bulkOverwriteGuildApplicationCommands(guild_id, command_id, payload)
-	return self:request("PUT", f(endpoints.GUILD_COMMAND, self._client.user.id, guild_id, command_id), payload)
+function API:bulkOverwriteGuildApplicationCommands(guild_id, payload)
+	return self:request("PUT", f(endpoints.GUILD_COMMANDS, self._client.user.id, guild_id), payload)
 end
 
 -- permissions --

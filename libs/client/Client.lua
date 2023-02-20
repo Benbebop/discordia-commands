@@ -1,22 +1,38 @@
 local discordia = require("discordia")
+local timer = require("timer")
 local Resolver = require("client/Resolver")
-local Cache = discordia.class.classes.Cache
-local enums = discordia.enums
 local shared = require("shared")
+local enums = discordia.enums
 
 local Command = require("containers/Command")
+local Cache = discordia.class.classes.Cache
 
 local Client = discordia.class.classes.Client
 
-function Client:newSlashCommand( name, guild ) return shared.newCommand( guild and self:getGuild(Resolver.guildId(guild)) or self, self, "chatInput", name, guild ) end
+function Client:newSlashCommand( name, guild )
+	local c = Command( {type = enums.applicationCommandType.chatInput, name = name, guild = Resolver.guildId( guild )}, self )
+	table.insert(self._applicationCommandsUnregistered, c)
+	self:_queueCommands()
+	return c
+end
 
-function Client:newUserCommand( name, guild ) return shared.newCommand( guild and self:getGuild(Resolver.guildId(guild)) or self, self, "user", name, guild ) end
+function Client:newUserCommand( name, guild )
+	local c = Command( {type = enums.applicationCommandType.user, name = name, guild = Resolver.guildId( guild )}, self )
+	table.insert(self._applicationCommandsUnregistered, c)
+	self:_queueCommands()
+	return c
+end
 
-function Client:newMessageCommand( name, guild ) return shared.newCommand( guild and self:getGuild(Resolver.guildId(guild)) or self, self, "message", name, guild ) end
+function Client:newMessageCommand( name, guild )
+	local c = Command( {type = enums.applicationCommandType.message, name = name, guild = Resolver.guildId( guild )}, self )
+	table.insert(self._applicationCommandsUnregistered, c)
+	self:_queueCommands()
+	return c
+end
 
-function Client:getGlobalCommand( id ) return shared.getCommand( self, Resolver.commandId( id ) ) end
+function Client:getCommand( id ) return shared.getCommand( self, Resolver.commandId( id ) ) end
 
-function Client:deleteGlobalCommand( id ) shared.deleteCommand( self, Resolver.commandId( id ) ) end
+function Client:deleteCommand( id ) shared.deleteCommand( self, Resolver.commandId( id ) ) end
 
 function Client.__getters:applicationCommands()
 	return self._commandCache
@@ -24,26 +40,84 @@ end
 
 function Client:cacheCommands() shared.cacheCommands(self) end
 
+function Client:_pushCommands()
+	if self._applicationCommandsUnregistered[1] then
+		local commands = self._applicationCommandsUnregistered
+		self._applicationCommandsUnregistered = {}
+		
+		for _,v in ipairs(commands) do
+			if v.guild then
+				v:_load( self._api:createGuildApplicationCommand(v._guild, v:_payload()) )
+				
+				v.guild._applicationCommands:_put( v )
+			else
+				v:_load( self._api:createGlobalApplicationCommand(v:_payload()) )
+				
+				self._applicationCommands:_put( v )
+			end
+			
+			v._queued = false
+		end
+	end
+	
+	if self._applicationCommandsModified[1] then
+		local commands = self._applicationCommandsModified
+		self._applicationCommandsModified = setmetatable({}, {__mode = "v"})
+		
+		local payloads = {}
+		
+		for _,v in ipairs(commands) do
+			assert(v, "you a poopy head")
+			local index = v._guild or "global"
+			payloads[index] = payloads[index] or {}
+			table.insert(payloads[index], v:_payload())
+		end
+		
+		if payloads.global then
+			local results, err = self._api:bulkOverwriteGlobalApplicationCommands(payloads.global)
+			assert(not err, err)
+			for _,v in ipairs(results) do
+				self._applicationCommands:_insert( v )
+			end
+			payloads.global = nil
+		end
+		
+		for guild,payload in pairs(payloads) do
+			local results, err = self._api:bulkOverwriteGuildApplicationCommands(guild, payload)
+			assert(not err, err)
+			commands = self:getGuild(guild)._applicationCommands
+			for _,v in ipairs(results) do
+				commands:_insert( v )
+			end
+		end
+	end
+end
+
+function Client:_queueCommands()
+	if self._commandUpdater then return end
+	self._commandUpdater = timer.setImmediate(function()
+		self._commandUpdater = nil
+		coroutine.wrap(Client._pushCommands)(self)
+	end)
+end
+
 local oldClientInit = Client.__init
 
 function Client:__init( ... )
-	self._commandTable = {}
-	self._commandCache = Cache( self._commandTable )
+	self._applicationCommandsUnregistered = {}
+	self._applicationCommandsModified = setmetatable({}, {__mode = "v"})
+	self._applicationCommands = Cache( {}, Command, self )
+	
+	self._commandUpdater = true
 	
 	local initResults = oldClientInit(self, ... )
 	
-	self:on("ready", function()
-		self:cacheCommands()
+	self:onceSync("ready", function()
+		self:_pushCommands()
 		
-		local toRemove = {}
-		for i,v in ipairs(self._commandTable) do
-			v:_execute()
-			if v._guild then
-				table.insert( self:getGuild(v._guild)._commandTable, v )
-				table.insert( toRemove, i )
-			end
-		end
-		for _,v in ipairs(toRemove) do table.remove(self._commandTable, v) end
+		self:info("Registered application commands")
+		
+		self._commandUpdater = nil
 	end)
 	
 	self:on("interactionCreate", function( interaction )

@@ -6,32 +6,60 @@ local Resolver = require("client/Resolver")
 
 local Option, get = class("Option", Snowflake)
 
-function Option:_raw()
+local function queue( self )
+	if self._command._queued then return end
+	self.client:_queueCommands()
+	table.insert(self.client._applicationCommandsModified, self._command)
+	self._command._queued = true
+end
+
+function Option:_payload()
 	local payload = {
 		type = self._type,
 		name = self._name, description = self._description,
 		required = not not self._required,
-		choices = self._choices and {}, options = self._choices and {}, channel_types = self._channel_types,
+		channel_types = self._channel_types,
 		min_value = self._min_value, max_value = self._max_value, min_length = self._min_length, max_length = self._max_length,
 		autocomplete = not not self._autocomplete
 	}
 	if self._choices then
+		payload.choices = {}
 		for i,v in ipairs(self._choices) do
-			payload.choices[i] = v:_raw()
+			payload.choices[i] = v:_payload()
 		end
 	end
 	if self._options then
+		payload.options = {}
 		for i,v in ipairs(self._options) do
-			payload.options[i] = v:_raw()
+			payload.options[i] = v:_payload()
 		end
 	end
 	return payload
 end
 
-function Option:__init( data, parent, command, client )
-	self._client, self._command = client or parent._client, command or parent._command
+function Option:overwrite( data )
+	self._name, self._description = data.name, data.description
+	self._required = data.required
+	self._channel_types = data.channel_types
+	self._min_value, self._max_value, self._min_length, self._max_length = data.min_value, data.max_value, data.min_length, data.max_length
+	self._autocomplete = data.autocomplete and self._autocomplete
+	if data.options then
+		self._options = self._options or {}
+		local options = {}
+		for i,v in ipairs(data.options) do
+			options[i] = self._options[i] and self._options[i]:overwrite(v) or Option(v, self)
+		end
+		self._options = options
+	end
+end
+
+function Option:__init( data, parent, command )
+	self._command = command or parent._command
+	self._type = data.type
 	
-	Snowflake.__init(self, data, parent)
+	Snowflake.__init(self, {}, parent)
+	
+	self:overwrite( data )
 end
 
 function get.type(self)
@@ -41,7 +69,7 @@ end
 function Option:setName( name )
 	self._name = name
 	
-	self._command:_queue()
+	queue( self )
 	
 	return self
 end
@@ -53,7 +81,7 @@ end
 function Option:setDescription( description )
 	self._description = description
 	
-	self._command:_queue()
+	queue( self )
 	
 	return self
 end
@@ -65,7 +93,7 @@ end
 function Option:setRequired( isRequired )
 	self._required = isRequired
 	
-	self._command:_queue()
+	queue( self )
 	
 	return self
 end
@@ -75,7 +103,7 @@ function get.required(self)
 end
 
 function Option:addChoice()
-	local o = Choice( {}, self, self._client )
+	local o = Choice( {}, self, self.client )
 	self._choices = self._choices or {}
 	table.insert(self._choices, o)
 	return o
@@ -84,7 +112,7 @@ end
 function Option:deleteChoice( index )
 	table.remove(self._choices, index)
 	
-	self._command:_queue()
+	queue( self )
 	
 	return self
 end
@@ -93,8 +121,8 @@ function get.choices(self)
 	return self._choices
 end
 
-function Option:addOption()
-	local o = Option( {}, self, self._command, self._client )
+function Option:addOption( optionType, name )
+	local o = Option( {type = optionType, name = name}, self )
 	self._options = self._options or {}
 	table.insert(self._options, o)
 	return o
@@ -103,7 +131,7 @@ end
 function Option:deleteOption( index )
 	table.remove(self._options, index)
 	
-	self._command:_queue()
+	queue( self )
 	
 	return self
 end
@@ -122,7 +150,7 @@ function Option:setChannelType( channelType, isShown )
 	end
 	if not exists then table.insert( self._channel_types, channelType ) end
 	
-	self._command:_queue()
+	queue( self )
 	
 	return self
 end
@@ -134,7 +162,7 @@ end
 function Option:setMinValue( value )
 	self._min_value = value
 	
-	self._command:_queue()
+	queue( self )
 	
 	return self
 end
@@ -153,6 +181,13 @@ end
 
 function get.maxLength(self)
 	return self._max_length
+end
+
+function Option:callback( callback )
+	self._listeners = self._listeners or {}
+	table.insert(self._listeners, callback)
+	
+	return self
 end
 
 function Option:autocomplete( callback )

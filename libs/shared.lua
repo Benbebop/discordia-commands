@@ -31,13 +31,13 @@ function shared.getCommand( self, command )
 	command = Resolver.commandId( command )
 	local c
 	for _,v in ipairs(self._commandTable) do
-		if v.id == command then c = v break end
+		if v._id == command then c = v break end
 	end
 	if not c then
 		if class.isInstance( self, class.classes.Guild ) then
-			c = Command( self._client._api:getGlobalApplicationCommand(command), self, self._client )
+			c = Command( self.client._api:getGuildApplicationCommand(self._id, command), self )
 		else
-			c = Command( self._api:getGlobalApplicationCommand(command), self, self )
+			c = Command( self._api:getGlobalApplicationCommand(command), self )
 		end
 		table.insert(self._commandTable, c)
 	end
@@ -47,7 +47,7 @@ end
 function shared.cacheCommands( self )
 	local commands
 	if class.isInstance( self, class.classes.Guild ) then
-		commands = self._client._api:getGuildApplicationCommands( self._id )
+		commands = self.client._api:getGuildApplicationCommands( self._id )
 	else
 		commands = self._api:getGlobalApplicationCommands()
 	end
