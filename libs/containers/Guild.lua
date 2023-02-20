@@ -19,7 +19,7 @@ function Guild:getGlobalCommand( id ) return shared.getCommand( self, Resolver.c
 function Guild:deleteGlobalCommand( id ) shared.deleteCommand( self, Resolver.commandId( id ) ) end
 
 function Guild.__getters:applicationCommands()
-	return self._commandCache
+	return self._applicationCommands
 end
 
 function Guild:cacheCommands() shared.cacheCommands(self) end

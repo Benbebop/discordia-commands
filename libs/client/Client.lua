@@ -35,10 +35,8 @@ function Client:getCommand( id ) return shared.getCommand( self, Resolver.comman
 function Client:deleteCommand( id ) shared.deleteCommand( self, Resolver.commandId( id ) ) end
 
 function Client.__getters:applicationCommands()
-	return self._commandCache
+	return self._applicationCommands
 end
-
-function Client:cacheCommands() shared.cacheCommands(self) end
 
 function Client:_pushCommands()
 	if self._applicationCommandsUnregistered[1] then
@@ -114,6 +112,20 @@ function Client:__init( ... )
 	
 	self:onceSync("ready", function()
 		self:_pushCommands()
+		
+		local results, err = self._api:getGlobalApplicationCommands()
+		assert(not err, err)
+		for _,v in ipairs(results) do
+			self._applicationCommands:_insert( v )
+		end
+		
+		for guild in self.guilds:iter() do
+			local results, err = self._api:getGuildApplicationCommands( guild.id )
+			assert(not err, err)
+			for _,v in ipairs(results) do
+				guild._applicationCommands:_insert( v )
+			end
+		end
 		
 		self:info("Registered application commands")
 		
