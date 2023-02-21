@@ -13,10 +13,6 @@ local function queue( self )
 	self._command._queued = true
 end
 
-function Option:__hash()
-	return self._command:__hash()
-end
-
 function Option:_payload()
 	local payload = {
 		type = self._type,
@@ -67,6 +63,10 @@ function Option:__init( data, parent, command )
 	Container.__init(self, {}, parent)
 	
 	self:_load( data )
+end
+
+function get.command(self)
+	return self._command
 end
 
 function get.type(self)
