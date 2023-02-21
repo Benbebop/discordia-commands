@@ -153,7 +153,7 @@ function Client:__init( ... )
 			end
 		end
 		
-		local callbacks, args, argsOrdered
+		local callbacks
 		
 		if group and sub then -- command is a subCommandGroup
 			local container = command
@@ -185,8 +185,17 @@ function Client:__init( ... )
 			callbacks = command._listeners or false
 		end
 		
+		local args, argsOrdered = {}, {}
+		
+		for _,v in ipairs((sub or data).options) do
+			table.insert(argsOrdered, v.value)
+			args[v.name] = v.value
+		end
+		
 		if callbacks == false then self:warning("No callbacks registered for: %s", (group or sub or {})) return end
 		if not callbacks then self:warning("idk XD") return end
+		
+		
 		
 		for _,v in ipairs(callbacks) do
 			coroutine.wrap(v)(interaction, args, argsOrdered)
