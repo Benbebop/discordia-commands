@@ -50,7 +50,7 @@ end)
 client:run("Bot " .. TOKEN)
 ```
 
-For further functionality, see the wiki.
+For further functionality, [see the wiki](https://github.com/Benbebop/discordia-commands/wiki).
 
 # Help
 
