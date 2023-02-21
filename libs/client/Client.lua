@@ -133,26 +133,64 @@ function Client:__init( ... )
 	end)
 	
 	self:on("interactionCreate", function( interaction )
-		if interaction.type ~= enums.interactionType.applicationCommand then return end
 		local data = interaction.data
-		local command
-		if data.guild_id then
-			command = self:getGuild( data.guild_id ):getGuildCommand( data.id )
-		else
-			command = self:getGlobalCommand( data.id )
-		end
-		if (not command) or (not command._listeners) then self:warning("Unhandled command event: %s", interaction.data.name) return end
-		local args, argsOrdered
-		if interaction.data.type == enums.applicationCommandType.chatInput then
-			args, argsOrdered = {}, {}
-			for i,v in ipairs(interaction.data.options) do
-				argsOrdered[i] = v.value
-				args[v.name] = v.value
+		local command = (data.guild_id and self:getGuild(data.guild_id) or self)._applicationCommands:get( data.id )
+		if not command then self:warning("Unhandled application command callback: %s", data.id) return end
+		
+		local group, sub
+		for _,v in ipairs(data.options or {}) do
+			if v.type == enums.applicationCommandOptionType.subCommandGroup then
+				group = v
+				for _,v in ipairs(v.options or {}) do
+					if v.type == enums.applicationCommandOptionType.subCommand then
+						sub = v
+					end
+				end
+				break
+			elseif v.type == enums.applicationCommandOptionType.subCommand then
+				sub = v
+				break
 			end
 		end
-		for _,v in ipairs( command._listeners ) do
-			coroutine.wrap(v)( interaction, args, argsOrdered )
+		
+		local callbacks, args, argsOrdered
+		
+		if group and sub then -- command is a subCommandGroup
+			local container = command
+			for _,v in ipairs(container._options) do
+				if v.name == group.name then
+					container = v
+					break
+				end
+			end
+			for _,v in ipairs(container._options) do
+				if v.name == sub.name then
+					container = v
+					break
+				end
+			end
+			
+			callbacks = container._listeners or {}
+		elseif sub then -- command is a subCommand
+			local container = command
+			for i,v in ipairs(container._options) do
+				if v.name == sub.name then
+					container = v
+					break
+				end
+			end
+			
+			callbacks = container._listeners or {}
+		elseif not group then -- command has no sub commands
+			callbacks = command._listeners or {}
 		end
+		
+		if not callbacks then self:warning("idk XD") return end
+		
+		for _,v in ipairs(callbacks) do
+			coroutine.wrap(v)(interaction, args, argsOrdered)
+		end
+		
 	end)
 	
 	return initResults
