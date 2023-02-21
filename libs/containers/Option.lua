@@ -1,10 +1,10 @@
 local discordia = require("discordia")
 local timer = require("timer")
 local class = discordia.class
-local Snowflake = class.classes.Snowflake
+local Container = class.classes.Container
 local Resolver = require("client/Resolver")
 
-local Option, get = class("Option", Snowflake)
+local Option, get = class("Option", Container)
 
 local function queue( self )
 	if self._command._queued then return end
@@ -57,7 +57,7 @@ function Option:__init( data, parent, command )
 	self._command = command or parent._command
 	self._type = data.type
 	
-	Snowflake.__init(self, {}, parent)
+	Container.__init(self, {}, parent)
 	
 	self:overwrite( data )
 end
