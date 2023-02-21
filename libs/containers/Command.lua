@@ -43,7 +43,7 @@ function Command:_load( data )
 		self._options = self._options or {}
 		local options = {}
 		for i,v in ipairs(data.options) do
-			options[i] = self._options[i] and self._options[i]:overwrite(v) or Option(v, self, self)
+			options[i] = self._options[i] and self._options[i]:_load(v) or Option(v, self, self)
 		end
 		self._options = options
 	end
@@ -186,6 +186,13 @@ function Command:delete()
 	end
 	
 	self._parent._applicationCommands:_delete( self._id )
+end
+
+function Command:callback( callback )
+	self._listeners = self._listeners or {}
+	table.insert(self._listeners, callback)
+	
+	return self
 end
 
 return Command

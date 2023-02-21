@@ -13,6 +13,10 @@ local function queue( self )
 	self._command._queued = true
 end
 
+function Option:__hash()
+	return self._command:__hash()
+end
+
 function Option:_payload()
 	local payload = {
 		type = self._type,
@@ -37,7 +41,7 @@ function Option:_payload()
 	return payload
 end
 
-function Option:overwrite( data )
+function Option:_load( data )
 	self._name, self._description = data.name, data.description
 	self._required = data.required
 	self._channel_types = data.channel_types
@@ -47,10 +51,11 @@ function Option:overwrite( data )
 		self._options = self._options or {}
 		local options = {}
 		for i,v in ipairs(data.options) do
-			options[i] = self._options[i] and self._options[i]:overwrite(v) or Option(v, self)
+			options[i] = self._options[i] and self._options[i]:_load(v) or Option(v, self)
 		end
 		self._options = options
 	end
+	return self
 end
 
 function Option:__init( data, parent, command )
@@ -59,7 +64,7 @@ function Option:__init( data, parent, command )
 	
 	Container.__init(self, {}, parent)
 	
-	self:overwrite( data )
+	self:_load( data )
 end
 
 function get.type(self)

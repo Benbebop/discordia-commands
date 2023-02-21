@@ -170,7 +170,7 @@ function Client:__init( ... )
 				end
 			end
 			
-			callbacks = container._listeners or {}
+			callbacks = container._listeners or false
 		elseif sub then -- command is a subCommand
 			local container = command
 			for i,v in ipairs(container._options) do
@@ -180,11 +180,12 @@ function Client:__init( ... )
 				end
 			end
 			
-			callbacks = container._listeners or {}
+			callbacks = container._listeners or false
 		elseif not group then -- command has no sub commands
-			callbacks = command._listeners or {}
+			callbacks = command._listeners or false
 		end
 		
+		if callbacks == false then self:warning("No callbacks registered for: %s", (group or sub or {})) return end
 		if not callbacks then self:warning("idk XD") return end
 		
 		for _,v in ipairs(callbacks) do
