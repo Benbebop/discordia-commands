@@ -35,7 +35,9 @@ function Option:_payload()
 	if self._options then
 		payload.options = {}
 		for i,v in ipairs(self._options) do
-			payload.options[i] = v:_payload()
+			if v._enabled ~= false then
+				table.insert(payload.options, v:_payload())
+			end
 		end
 	end
 	return payload
@@ -199,6 +201,23 @@ function Option:autocomplete( callback )
 	self._autocomplete = callback
 	
 	return self
+end
+
+function Option:setEnabled( isEnabled )
+	self._enabled = isEnabled
+	
+	queue( self )
+	
+	return self
+end
+
+function Option:remove()
+	for i,v in ipairs( self._parent._options ) do
+		if self == v then
+			table.remove( self._parent._options, i )
+			break
+		end
+	end
 end
 
 return Option

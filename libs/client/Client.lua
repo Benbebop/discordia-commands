@@ -195,8 +195,6 @@ function Client:__init( ... )
 		if callbacks == false then self:warning("No callbacks registered for: %s", (group or sub or {})) return end
 		if not callbacks then self:warning("idk XD") return end
 		
-		
-		
 		for _,v in ipairs(callbacks) do
 			coroutine.wrap(v)(interaction, args, argsOrdered)
 		end

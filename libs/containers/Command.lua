@@ -27,7 +27,9 @@ function Command:_payload()
 		payload.options = {}
 		
 		for i,v in ipairs(self._options) do
-			payload.options[i] = v:_payload()
+			if v._enabled ~= false then
+				table.insert(payload.options, v:_payload())
+			end
 		end
 	end
 	
