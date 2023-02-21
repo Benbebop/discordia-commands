@@ -59,10 +59,6 @@ function Command:__init( data, parent )
 	queue( self )
 end
 
-function get.id(self)
-	return self._id
-end
-
 function get.type(self)
 	return self._type
 end

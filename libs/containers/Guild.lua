@@ -14,9 +14,9 @@ function Guild:newUserCommand( name, guild ) return shared.newCommand( self, sel
 
 function Guild:newMessageCommand( name, guild ) return shared.newCommand( self, self._client, "userInput", name ) end
 
-function Guild:getGlobalCommand( id ) return shared.getCommand( self, Resolver.commandId( id ) ) end
+function Guild:getCommand( id ) return shared.getCommand( self, Resolver.commandId( id ) ) end
 
-function Guild:deleteGlobalCommand( id ) shared.deleteCommand( self, Resolver.commandId( id ) ) end
+function Guild:deleteCommand( id ) shared.deleteCommand( self, Resolver.commandId( id ) ) end
 
 function Guild.__getters:applicationCommands()
 	return self._applicationCommands
