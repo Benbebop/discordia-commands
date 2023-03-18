@@ -38,24 +38,62 @@ function Client.__getters:applicationCommands()
 	return self._applicationCommands
 end
 
+local function processError(self, err)
+	if not err then return end
+	if err:match("^%s*HTTP%s*Error%s*(%d+)") ~= "50035" then error(err) end
+	err = err:match("[\n\r]%s+(.+)$")
+	self:warning("Malformed commands: " .. err)
+	return err
+end
+
 function Client:_pushCommands()
 	if self._applicationCommandsUnregistered[1] then
 		local commands = self._applicationCommandsUnregistered
 		self._applicationCommandsUnregistered = {}
 		
+		local payloads, sorted = {}, {}
+		
 		for _,v in ipairs(commands) do
-			if v.guild then
-				v:_load( self._api:createGuildApplicationCommand(v._guild, v:_payload()) )
-				
-				v.guild._applicationCommands:_put( v )
-			else
-				v:_load( self._api:createGlobalApplicationCommand(v:_payload()) )
-				
-				self._applicationCommands:_put( v )
-			end
-			
-			v._queued = false
+			assert(v, "you a poopy head")
+			local index = v._guild or "global"
+			payloads[index] = payloads[index] or {}
+			sorted[index] = sorted[index] or {}
+			table.insert(payloads[index], v:_payload())
+			table.insert(sorted[index], v)
 		end
+		
+		commands = nil
+		
+		if payloads.global then
+			local results, err = self._api:bulkOverwriteGlobalApplicationCommands(payloads.global)
+			if processError(self, err) then return end
+			
+			for _,v in ipairs(sorted.global) do
+				for _,k in ipairs(results) do
+					if v:compare(k) then
+						v:_load(k)
+						self._applicationCommands:_put( v )
+					end
+				end
+			end
+			payloads.global = nil
+			sorted.global = nil
+		end
+		
+		for guild,payload in pairs(payloads) do
+			local results, err = self._api:bulkOverwriteGuildApplicationCommands(guild, payload)
+			if processError(self, err) then return end
+			
+			for _,v in ipairs(sorted[guild]) do
+				for _,k in ipairs(results) do
+					if v:compare(k) then
+						v:_load(k)
+						v.guild._applicationCommands:_put( v )
+					end
+				end
+			end
+		end
+		
 	end
 	
 	if self._applicationCommandsModified[1] then
@@ -73,7 +111,8 @@ function Client:_pushCommands()
 		
 		if payloads.global then
 			local results, err = self._api:bulkOverwriteGlobalApplicationCommands(payloads.global)
-			assert(not err, err)
+			if processError(self, err) then return end
+			
 			for _,v in ipairs(results) do
 				self._applicationCommands:_insert( v )
 			end
@@ -82,12 +121,17 @@ function Client:_pushCommands()
 		
 		for guild,payload in pairs(payloads) do
 			local results, err = self._api:bulkOverwriteGuildApplicationCommands(guild, payload)
-			assert(not err, err)
+			if processError(self, err) then return end
+			
+			p("test4")
+			
 			commands = self:getGuild(guild)._applicationCommands
 			for _,v in ipairs(results) do
 				commands:_insert( v )
 			end
 		end
+		
+		p("test3")
 	end
 end
 
