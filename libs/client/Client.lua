@@ -123,15 +123,11 @@ function Client:_pushCommands()
 			local results, err = self._api:bulkOverwriteGuildApplicationCommands(guild, payload)
 			if processError(self, err) then return end
 			
-			p("test4")
-			
 			commands = self:getGuild(guild)._applicationCommands
 			for _,v in ipairs(results) do
 				commands:_insert( v )
 			end
 		end
-		
-		p("test3")
 	end
 end
 
@@ -161,14 +157,6 @@ function Client:__init( ... )
 		assert(not err, err)
 		for _,v in ipairs(results) do
 			self._applicationCommands:_insert( v )
-		end
-		
-		for guild in self.guilds:iter() do
-			local results, err = self._api:getGuildApplicationCommands( guild.id )
-			assert(not err, err)
-			for _,v in ipairs(results) do
-				guild._applicationCommands:_insert( v )
-			end
 		end
 		
 		self:info("Registered application commands")

@@ -27,7 +27,9 @@ function Guild:cacheCommands() shared.cacheCommands(self) end
 local oldGuildInit = Guild.__init
 
 function Guild:__init( ... )
-	self._applicationCommands = Cache( {}, Command, self )
+	local returns = {oldGuildInit(self, ... )}
 	
-	return oldGuildInit(self, ... )
+	self._applicationCommands = Cache( self.client._api:getGuildApplicationCommands( self.id ), Command, self )
+	
+	return unpack(returns)
 end
