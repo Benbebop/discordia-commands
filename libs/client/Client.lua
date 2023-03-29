@@ -67,7 +67,7 @@ function Client:_pushCommands()
 		if payloads.global then
 			local results, err = self._api:bulkOverwriteGlobalApplicationCommands(payloads.global)
 			if processError(self, err) then return end
-			
+
 			for _,v in ipairs(sorted.global) do
 				for _,k in ipairs(results) do
 					if v:compare(k) then
@@ -139,6 +139,10 @@ function Client:_queueCommands()
 	end)
 end
 
+function Client:defaultCommandCallback(callback)
+	self._defaultCommandCallback = callback
+end
+
 local oldClientInit = Client.__init
 
 function Client:__init( ... )
@@ -165,10 +169,11 @@ function Client:__init( ... )
 	end)
 	
 	self:on("interactionCreate", function( interaction )
+		if interaction.type ~= enums.interactionType.applicationCommand then return end
 		local data = interaction.data
 		local command = (data.guild_id and self:getGuild(data.guild_id) or self)._applicationCommands:get( data.id )
 		if not command then self:warning("Unhandled application command callback: %s", data.id) return end
-		
+
 		local group, sub
 		for _,v in ipairs(data.options or {}) do
 			if v.type == enums.applicationCommandOptionType.subCommandGroup then
@@ -186,7 +191,7 @@ function Client:__init( ... )
 		end
 		
 		local callbacks
-		
+
 		if group and sub then -- command is a subCommandGroup
 			local container = command
 			for _,v in ipairs(container._options) do
@@ -219,12 +224,19 @@ function Client:__init( ... )
 		
 		local args, argsOrdered = {}, {}
 		
-		for _,v in ipairs((sub or data).options) do
-			table.insert(argsOrdered, v.value)
-			args[v.name] = v.value
+		local options = (sub or data).options
+		if options then
+			for _,v in ipairs((sub or data).options) do
+				table.insert(argsOrdered, v.value)
+				args[v.name] = v.value
+			end
 		end
 		
-		if callbacks == false then self:warning("No callbacks registered for: %s", (group or sub or {})) return end
+		if callbacks == false then 
+			if self._defaultCommandCallback then self._defaultCommandCallback(interaction, args, argsOrdered) end
+			self:warning("No callbacks registered for: %s", (group or sub or "nil")) 
+			return
+		end
 		if not callbacks then self:warning("idk XD") return end
 		
 		for _,v in ipairs(callbacks) do

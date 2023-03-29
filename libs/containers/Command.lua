@@ -173,7 +173,7 @@ function get.version(self)
 end
 
 function Command:compare( other )
-	return (self._type == (other._type or other.type)) and (self._guild == (other._guild or other.guild)) and (self._name == (other._name or other.name))
+	return (self._type == (other._type or other.type)) and (self._guild == (other._guild or other.guild_id)) and (self._name == (other._name or other.name))
 end
 
 function Command:delete()
@@ -189,7 +189,7 @@ end
 function Command:callback( callback )
 	self._listeners = self._listeners or {}
 	table.insert(self._listeners, callback)
-	
+
 	return self
 end
 
