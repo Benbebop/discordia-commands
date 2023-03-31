@@ -155,7 +155,8 @@ function Client:__init( ... )
 	local initResults = oldClientInit(self, ... )
 	
 	self:onceSync("ready", function()
-		self:_pushCommands()
+		local init = self._options.initCommands
+		if init or init == nil then self:_pushCommands() end
 		
 		local results, err = self._api:getGlobalApplicationCommands()
 		assert(not err, err)
